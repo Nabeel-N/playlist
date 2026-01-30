@@ -4,7 +4,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import dotenv from "dotenv";
 import playlistRoutes from "./routes/playlist.routes";
-// 1. IMPORT THE SERVICE
 import { AuthService } from "./services/auth.services";
 
 dotenv.config();
@@ -30,12 +29,11 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL: "http://localhost:8080/auth/google/callback",
     },
-    // 3. CHANGE THIS FUNCTION TO ASYNC
+
     async (accessToken, refreshToken, profile, done) => {
       try {
         const dbUser = await authService.handleGoogleLogin(profile);
 
-        // 5. PASS THE REAL DB USER (dbUser) INSTEAD OF THE GOOGLE PROFILE
         return done(null, dbUser);
       } catch (e) {
         return done(e, false);
@@ -65,6 +63,7 @@ app.get(
   },
 );
 
+app.use("/playlist", playlistRoutes);
 app.use("/playlist", playlistRoutes);
 
 app.listen(8080, () => {

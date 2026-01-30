@@ -10,6 +10,7 @@ const playlistRepository = new PlaylistRepository();
 const playlistService = new PlaylistService(playlistRepository);
 const playlistController = new PlaylistController(playlistService);
 
-router.post("/create", authMiddleware, playlistController.create);
+router.post("/", authMiddleware, playlistController.create);
+router.get("/", authMiddleware, playlistController.get);
 
 export default router;
