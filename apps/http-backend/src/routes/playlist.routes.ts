@@ -12,5 +12,7 @@ const playlistController = new PlaylistController(playlistService);
 
 router.post("/", authMiddleware, playlistController.create);
 router.get("/", authMiddleware, playlistController.get);
+router.put("/:id", authMiddleware, playlistController.update);
+router.delete("/:id", authMiddleware, playlistController.delete);
 
 export default router;

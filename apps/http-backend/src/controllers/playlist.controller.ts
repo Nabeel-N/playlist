@@ -48,4 +48,59 @@ export class PlaylistController {
       res.status(500).json({ message: "Error fetching playlists" });
     }
   };
+
+  update = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const userId = (req as any).user?.id;
+
+    if (!name) {
+      res.status(400).json({ message: "Playlist name is required" });
+      return;
+    }
+
+    try {
+      const result = await this.playlistService.updatePlaylist(
+        id as string,
+        name,
+        userId,
+      );
+
+      if (!result) {
+        res
+          .status(404)
+          .json({ message: "Playlist not found or you don't own it" });
+        return;
+      }
+
+      res.status(200).json(result);
+    } catch (e) {
+      console.log(e);
+      res.status(500).json({ message: "Error updating playlist" });
+    }
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = (req as any).user?.id;
+
+    try {
+      const success = await this.playlistService.deletePlaylist(
+        id as string,
+        userId,
+      );
+
+      if (!success) {
+        res
+          .status(404)
+          .json({ message: "Playlist not found or you don't own it" });
+        return;
+      }
+
+      res.status(200).json({ message: "Playlist deleted successfully" });
+    } catch (e) {
+      console.log(e);
+      res.status(500).json({ message: "Error deleting playlist" });
+    }
+  };
 }
