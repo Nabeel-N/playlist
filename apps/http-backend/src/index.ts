@@ -3,12 +3,15 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import dotenv from "dotenv";
+import playlistRoutes from "./routes/playlist.routes";
+// 1. IMPORT THE SERVICE
+import { AuthService } from "./services/auth.services";
 
 dotenv.config();
 
 const app = express();
+const authService = new AuthService();
 
-// 1. Setup Session (Required for Passport to remember the user)
 app.use(
   session({
     secret: "secret_key_needs_to_be_complex",
@@ -17,7 +20,6 @@ app.use(
   }),
 );
 
-// 2. Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -28,28 +30,32 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL: "http://localhost:8080/auth/google/callback",
     },
-    (accessToken, refreshToken, profile, done) => {
-      // This runs when Google sends the user back
-      console.log("User logged in:", profile.emails?.[0].value);
-      return done(null, profile);
+    // 3. CHANGE THIS FUNCTION TO ASYNC
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const dbUser = await authService.handleGoogleLogin(profile);
+
+        // 5. PASS THE REAL DB USER (dbUser) INSTEAD OF THE GOOGLE PROFILE
+        return done(null, dbUser);
+      } catch (e) {
+        return done(e, false);
+      }
     },
   ),
 );
 
-// 4. Serialization (Required so the user stays logged in)
+// Serialization
 passport.serializeUser((user: any, done) => done(null, user));
 passport.deserializeUser((user: any, done) => done(null, user));
 
-// 5. Routes
+// Routes
 app.use(express.json());
 
-// A. Login Route (Frontend hits this)
 app.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
-// B. Callback Route (Google hits this)
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
@@ -58,6 +64,8 @@ app.get(
     res.redirect("http://localhost:3000/dashboard");
   },
 );
+
+app.use("/playlist", playlistRoutes);
 
 app.listen(8080, () => {
   console.log("Server is running on port 8080");
