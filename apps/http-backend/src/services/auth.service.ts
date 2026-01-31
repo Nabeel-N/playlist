@@ -1,7 +1,6 @@
 import prisma from "@repo/db";
 
 export class AuthService {
-  // "Upsert" = Update if exists, Insert if new
   async handleGoogleLogin(profile: any) {
     const email = profile.emails?.[0]?.value;
     const googleId = profile.id;
@@ -11,6 +10,7 @@ export class AuthService {
     if (!email) {
       throw new Error("Google profile is missing email");
     }
+
 
     const user = await prisma.user.upsert({
       where: {
