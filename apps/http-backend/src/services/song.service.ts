@@ -6,8 +6,8 @@ export class SongService {
     this.songRepository = songRepository;
   }
 
-  async create(name: string, artist: string, thumbnail: string) {
-    return await this.songRepository.create(name, artist, thumbnail);
+  async create(name: string, artistId: string, thumbnail: string, url: string) {
+    return await this.songRepository.create(name, artistId, thumbnail, url);
   }
 
   async getAll() {

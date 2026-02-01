@@ -8,17 +8,22 @@ export class SongController {
   }
 
   create = async (req: Request, res: Response) => {
-    const { name, artist, thumbnail } = req.body;
+    const { name, artistId, thumbnail, url } = req.body;
 
-    if (!name || !artist || !thumbnail) {
+    if (!name || !artistId || !thumbnail || !url) {
       res
         .status(400)
-        .json({ message: "Name, artist, and thumbnail are required" });
+        .json({ message: "Name, artistId, thumbnail, and url are required" });
       return;
     }
 
     try {
-      const song = await this.songService.create(name, artist, thumbnail);
+      const song = await this.songService.create(
+        name,
+        artistId,
+        thumbnail,
+        url,
+      );
       res.status(201).json(song);
     } catch (e) {
       console.log(e);

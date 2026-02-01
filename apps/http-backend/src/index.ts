@@ -5,6 +5,7 @@ import session from "express-session";
 import dotenv from "dotenv";
 import playlistRoutes from "./routes/playlist.routes";
 import songRoutes from "./routes/song.routes";
+import adminRoutes from "./routes/admin.routes";
 import { AuthService } from "./services/auth.service";
 
 dotenv.config();
@@ -66,6 +67,7 @@ app.get(
 
 app.use("/playlist", playlistRoutes);
 app.use("/song", songRoutes);
+app.use("/admin", adminRoutes);
 
 app.listen(8080, () => {
   console.log("Server is running on port 8080");

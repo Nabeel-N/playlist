@@ -1,13 +1,14 @@
 import prisma from "@repo/db";
 
 export class SongRepository {
-  async create(name: string, artist: string, thumbnail: string) {
+  async create(name: string, artistId: string, thumbnail: string, url: string) {
     return await prisma.song.create({
       data: {
         name,
-        artist,
         thumbnail,
-      },
+        url,
+        artistId: artistId,
+      },  
     });
   }
 

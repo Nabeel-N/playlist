@@ -17,8 +17,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  playlists  Playlist[] 
-  likedSongs LikedSong[]
+  playlists         Playlist[] 
+  likedSongs        LikedSong[]
+  
+  
+  followedArtists   Artist[]   @relation("UserFollowsArtist")
+  followedPodcasts  Podcast[]  @relation("UserFollowsPodcast")
 }
 
 model Playlist {
@@ -27,8 +31,6 @@ model Playlist {
   
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-
-  
   songs     Song[]   
   
   createdAt DateTime @default(now())
@@ -36,14 +38,54 @@ model Playlist {
 }
 
 
+model Artist {
+  id          String   @id @default(uuid())
+  name        String
+  bio         String?
+  profilePic  String?
+  
+  songs       Song[]   
+  
+  followedBy  User[]   @relation("UserFollowsArtist")
+}
+
 model Song {
   id           String   @id @default(uuid())
   name         String   
-  artist       String   
   thumbnail    String   
+  url          String
+  
+  artistId     String
+  artist       Artist   @relation(fields: [artistId], references: [id])
   
   playlists    Playlist[] 
   likedBy      LikedSong[]
+}
+
+
+model Podcast {
+  id          String   @id @default(uuid())
+  name        String
+  profilePic  String
+  genre       String
+  about       String
+  rating      Float    @default(0.0) 
+  
+  
+  episodes    Episode[]
+  followedBy  User[]   @relation("UserFollowsPodcast")
+}
+
+model Episode {
+  id          String   @id @default(uuid())
+  title       String
+  duration    Int      
+  url         String   
+  
+  podcastId   String
+  podcast     Podcast  @relation(fields: [podcastId], references: [id])
+  
+  createdAt   DateTime @default(now())
 }
 
 model LikedSong {
