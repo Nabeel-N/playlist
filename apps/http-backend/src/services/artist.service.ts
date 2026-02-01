@@ -7,6 +7,10 @@ export class ArtistService {
     this.artistRepository = new ArtistRepository();
   }
 
+  async create(name: string, bio: string, profilePic: string) {
+    return await this.artistRepository.create(name, bio, profilePic);
+  }
+
   async getAll() {
     return await this.artistRepository.findAll();
   }
