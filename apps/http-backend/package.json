@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
@@ -19,8 +20,10 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.3",
     "@repo/db": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/node": "^22.15.3",
