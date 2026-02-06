@@ -94,7 +94,7 @@ app.use("/artist", artistRoutes);
 app.use("/podcast", podcastRoutes);
 app.use("/episode", episodeRoute);
 
-// --- 4. START SERVER ---
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
