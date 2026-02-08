@@ -11,6 +11,7 @@ import songRoutes from "./routes/song.routes";
 import artistRoutes from "./routes/artist.routes";
 import podcastRoutes from "./routes/podcastroute";
 import episodeRoute from "./routes/episode.route";
+import followedRoute from "./routes/followedcontent.route";
 
 // Import Services
 import { AuthService } from "./services/auth.service";
@@ -93,7 +94,7 @@ app.use("/song", songRoutes);
 app.use("/artist", artistRoutes);
 app.use("/podcast", podcastRoutes);
 app.use("/episode", episodeRoute);
-
+app.use("/followedcontent", followedRoute);
 
 const PORT = 8080;
 app.listen(PORT, () => {
