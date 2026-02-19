@@ -1,147 +1,209 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, MouseEvent as ReactMouseEvent } from "react";
 import Sidebar from "@repo/ui/Sidebar";
+import HomeIcon from "@repo/ui/icons/HomeIcon";
+import SongOpen from "@repo/ui/songOpen";
+
+interface Song {
+  id: string;
+  name: string;
+  thumbnail: string;
+  artist?: { name: string };
+}
+
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  songId: string | null;
+}
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(true);
-  const [songs, setSongs] = useState<any[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<number | null>(null);
+  const [greeting, setGreeting] = useState("Good morning");
+
+  // State for the custom right-click menu
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    songId: null,
+  });
 
   useEffect(() => {
-    const fetchSongs = async () => {
-      try {
-        setLoading(true);
-        // Using localhost ensures the browser matches the session cookie correctly
-        const response = await fetch("http://localhost:8080/song", {
-          method: "GET",
-          credentials: "include", // Essential for keeping you logged in
-        });
-
-        setStatus(response.status);
-
-        if (response.ok) {
-          const data = await response.json();
-          // Fallback to empty array if no songs exist
-          setSongs(data.songs || (Array.isArray(data) ? data : []));
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        setStatus(500);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSongs();
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
   }, []);
 
-  return (
-    <div className="flex h-screen w-full bg-zinc-950 text-white overflow-hidden font-sans">
-      {/* Sidebar Component */}
-      <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+  // Close context menu when clicking anywhere else
+  useEffect(() => {
+    const closeMenu = () =>
+      setContextMenu((prev) => ({ ...prev, visible: false }));
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, []);
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-black tracking-tighter">Your Library</h1>
-          <div className="flex items-center gap-4">
-            {status === 200 && (
-              <button
-                onClick={() => window.location.reload()}
-                className="text-xs font-bold text-zinc-500 hover:text-lime-500 transition-colors uppercase tracking-widest"
-              >
-                Refresh Data
-              </button>
-            )}
-          </div>
+  const fetchSongs = async (url: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      setStatus(response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        setSongs(data.songs || (Array.isArray(data) ? data : []));
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setStatus(500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSongs("http://localhost:8080/song");
+  }, []);
+
+  // Handler for Right-Click
+  const handleRightClick = (e: ReactMouseEvent, songId: string) => {
+    e.preventDefault(); // Prevent default browser menu
+
+    setContextMenu({
+      visible: true,
+      x: e.pageX,
+      y: e.pageY,
+      songId: songId,
+    });
+  };
+
+  return (
+    <div className="flex h-screen w-full bg-black text-white overflow-hidden font-sans selection:bg-green-500 selection:text-black">
+      <div className="flex-shrink-0 h-full">
+        <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+      </div>
+
+      <main className="flex-1 relative overflow-y-auto bg-zinc-900 rounded-lg m-2 ml-0 custom-scrollbar">
+        <div className="p-4 relative z-20">
+          <HomeIcon className="size-8" />
         </div>
 
-        {loading ? (
-          /* Loading State Skeleton */
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {[...Array(10)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-zinc-900/50 aspect-square rounded-xl animate-pulse"
-              />
-            ))}
-          </div>
-        ) : status === 401 ? (
-          /* 401 Unauthorized State */
-          <div className="flex flex-col items-center justify-center mt-20 p-12 bg-zinc-900/30 border border-zinc-800 rounded-3xl text-center max-w-xl mx-auto shadow-2xl">
-            <div className="bg-zinc-800/50 p-5 rounded-full mb-6">
-              <svg
-                className="w-10 h-10 text-zinc-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+        <div className="absolute inset-0 h-80 bg-gradient-to-b from-indigo-900/80 to-zinc-900 pointer-events-none" />
+        <div className="relative z-10 p-8 pt-0">
+          <header className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">{greeting}</h1>
+            <div className="flex gap-4">
+              <div className="bg-black/40 hover:bg-black/60 transition p-1 pr-3 rounded-full flex items-center gap-2 cursor-pointer">
+                <div className="w-7 h-7 bg-zinc-700 rounded-full flex items-center justify-center text-xs font-bold">
+                  U
+                </div>
+                <span className="text-sm font-bold text-zinc-200">User</span>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold mb-3">Session Expired</h2>
-            <p className="text-zinc-400 mb-8 leading-relaxed">
-              To keep your data safe, we need you to sign in again via Google.
-            </p>
-            <a
-              href="http://localhost:8080/auth/google"
-              className="px-10 py-4 bg-white text-black font-black rounded-full hover:scale-105 transition-all active:scale-95 shadow-lg shadow-white/5"
-            >
-              SIGN IN WITH GOOGLE
-            </a>
-          </div>
-        ) : songs.length > 0 ? (
-          /* Song Grid Display */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-            {songs.map((song) => (
-              <div
-                key={song.id}
-                className="bg-zinc-900/40 p-5 rounded-2xl border border-zinc-800/40 group hover:bg-zinc-800/60 transition-all duration-300 cursor-pointer hover:-translate-y-1 shadow-md"
-              >
-                <div className="relative aspect-square mb-5 overflow-hidden rounded-xl bg-zinc-800 shadow-2xl">
-                  <img
-                    src={
-                      song.thumbnail ||
-                      "https://placehold.co/600x600/18181b/52525b?text=No+Artwork"
-                    }
-                    alt={song.name}
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
+          </header>
+
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-zinc-800/50 p-4 rounded-md animate-pulse"
+                >
+                  <div className="w-full aspect-square bg-zinc-700/50 rounded-md mb-4" />
+                  <div className="h-4 bg-zinc-700/50 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-zinc-700/50 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : status === 401 ? (
+            // ... [Login Error State remains the same] ...
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+              <div className="mb-6 p-6 bg-zinc-800 rounded-full shadow-2xl">
+                <svg
+                  className="w-12 h-12 text-zinc-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="bg-lime-500 rounded-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform shadow-xl">
-                      <svg
-                        className="w-6 h-6 text-black fill-current"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">
+                Log in to see your music
+              </h2>
+              <a
+                href="http://localhost:8080/auth/google"
+                className="px-8 py-3 mt-4 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform"
+              >
+                Log in with Google
+              </a>
+            </div>
+          ) : songs.length > 0 ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Your Top Mixes</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {songs.map((song) => (
+                  <div
+                    // Trigger custom right click handler
+                    onContextMenu={(e) => handleRightClick(e, song.id)}
+                    key={song.id}
+                    className="group bg-zinc-900/40 hover:bg-zinc-800 transition-all duration-300 p-4 rounded-3xl cursor-pointer relative"
+                  >
+                    <div className="relative aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-md overflow-hidden">
+                      <img
+                        src={
+                          song.thumbnail ||
+                          "https://placehold.co/400?text=Music"
+                        }
+                        alt={song.name}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="min-h-[60px]">
+                      <h3 className="font-bold text-base text-white truncate mb-1">
+                        {song.name}
+                      </h3>
+                      <p className="text-sm text-zinc-400 line-clamp-2">
+                        {song.artist?.name || "Unknown Artist"}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <h3 className="font-bold truncate text-zinc-100 text-lg">
-                  {song.name}
-                </h3>
-                <p className="text-[10px] text-zinc-500 mt-2 uppercase tracking-[0.2em] font-black group-hover:text-lime-500 transition-colors">
-                  Digital Track
-                </p>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center py-32 bg-zinc-900/10 rounded-3xl border-2 border-dashed border-zinc-800/50">
-            <p className="text-zinc-500 font-medium italic">
-              Your music library is currently empty.
-            </p>
-          </div>
-        )}
+            </div>
+          ) : (
+            // ... [Empty State remains the same] ...
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="text-4xl mb-4">🎵</div>
+              <h3 className="text-xl font-bold">It's a bit quiet here</h3>
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* Render the Custom Context Menu */}
+      {contextMenu.visible && (
+        <SongOpen
+          x={contextMenu.x}
+          y={contextMenu.y}
+          songId={contextMenu.songId}
+          onClose={() => setContextMenu({ ...contextMenu, visible: false })}
+        />
+      )}
     </div>
   );
 }

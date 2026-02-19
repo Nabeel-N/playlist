@@ -17,5 +17,5 @@ router.get("/:id", playlistController.getById);
 router.put("/:id", playlistController.update);
 
 router.delete("/:id", playlistController.delete);
-
+router.post("/:id/songs", playlistController.addSong);
 export default router;

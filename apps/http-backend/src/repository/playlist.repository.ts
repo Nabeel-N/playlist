@@ -62,4 +62,15 @@ export class PlaylistRepository {
       where: { id },
     });
   }
+
+  async addSong(playlistId: string, songId: string) {
+    return await prisma.playlist.update({
+      where: { id: playlistId },
+      data: {
+        songs: {
+          connect: { id: songId }, // Prisma syntax to link two existing records
+        },
+      },
+    });
+  }
 }

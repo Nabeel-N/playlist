@@ -1,6 +1,8 @@
-export default function PlusIcon() {
+import { MouseEventHandler } from "react";
+
+export default function PlusIcon({ onClick }: { onClick: MouseEventHandler }) {
   return (
-    <div className="p-2 bg-neutral-500 rounded-full">
+    <div className="p-2 bg-neutral-500 rounded-full" onClick={onClick}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

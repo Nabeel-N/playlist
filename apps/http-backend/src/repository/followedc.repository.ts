@@ -1,7 +1,9 @@
 import prisma from "@repo/db";
 
 export class FollowedRepository {
-  constructor() {}
+  constructor() {
+    
+  }
 
   async getUserLibrary(userId: string) {
     return await prisma.user.findUnique({

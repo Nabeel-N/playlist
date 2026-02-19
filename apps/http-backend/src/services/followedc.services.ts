@@ -14,14 +14,11 @@ export class FollowedServices {
       return [];
     }
 
-    // Transform and Merge data into a single list for the Sidebar
     const library = [
       ...data.playlists.map((playlist) => ({
         id: playlist.id,
         name: playlist.name,
-        image: "/images/playlist-placeholder.png", // specific placeholder for playlists
         type: "Playlist",
-        subtitle: "Playlist • " + data.playlists.length + " songs", // Example logic
       })),
       ...data.followedArtists.map((artist) => ({
         id: artist.id,

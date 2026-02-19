@@ -15,6 +15,7 @@ import followedRoute from "./routes/followedcontent.route";
 
 // Import Services
 import { AuthService } from "./services/auth.service";
+import { callbackify } from "util";
 
 dotenv.config();
 

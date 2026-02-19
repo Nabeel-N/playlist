@@ -58,4 +58,16 @@ export class PlaylistService {
     await this.playlistRepository.delete(id);
     return true;
   }
+
+  async addSongToPlaylist(playlistId: string, songId: string, userId: string) {
+    // 1. Verify the playlist exists and belongs to the logged-in user
+    const playlist = await this.playlistRepository.findById(playlistId);
+
+    if (!playlist || playlist.userId !== userId) {
+      return null; // Deny access
+    }
+
+    // 2. Connect the song to the playlist
+    return await this.playlistRepository.addSong(playlistId, songId);
+  }
 }

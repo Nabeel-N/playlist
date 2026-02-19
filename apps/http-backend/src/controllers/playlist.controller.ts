@@ -134,4 +134,42 @@ export class PlaylistController {
       res.status(500).json({ message: "Error deleting playlist" });
     }
   };
+
+  addSong = async (req: Request, res: Response) => {
+    const playlistId = req.params.id;
+    const { songId } = req.body;
+    const userId = (req as any).user?.id; // Assumes authMiddleware sets this
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!songId) {
+      res.status(400).json({ message: "songId is required in the body" });
+      return;
+    }
+
+    try {
+      const result = await this.playlistService.addSongToPlaylist(
+        playlistId as string,
+        songId,
+        userId,
+      );
+
+      if (!result) {
+        res
+          .status(404)
+          .json({ message: "Playlist not found or ownership denied" });
+        return;
+      }
+
+      res
+        .status(200)
+        .json({ message: "Song added successfully", playlist: result });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: "Error adding song to playlist" });
+    }
+  };
 }
