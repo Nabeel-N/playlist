@@ -13,6 +13,8 @@ const songService = new SongService(songRepository);
 const songController = new SongController(songService);
 
 router.post("/", authMiddleware, songController.create);
+router.get("/:id", authMiddleware, songController.getById);
+
 router.get("/", authMiddleware, songController.getAll);
 
 export default router;

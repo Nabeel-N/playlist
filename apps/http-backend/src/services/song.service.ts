@@ -13,4 +13,8 @@ export class SongService {
   async getAll() {
     return await this.songRepository.findAll();
   }
+
+  async getById(id: string) {
+    return await this.songRepository.findById(id);
+  }
 }

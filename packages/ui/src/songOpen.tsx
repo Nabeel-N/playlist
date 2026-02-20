@@ -73,7 +73,7 @@ export default function SongOpen({ x, y, songId, onClose }: SongOpenProps) {
 
       if (response.ok) {
         console.log("Song added successfully!");
-        onClose(); 
+        onClose();
       } else {
         console.error("Failed to add song to playlist");
       }
