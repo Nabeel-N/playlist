@@ -26,7 +26,6 @@ export default function SongOpen({ x, y, songId, onClose }: SongOpenProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Safely position the menu so it doesn't go off-screen
   const menuWidth = 240;
   const menuHeight = 250;
   const safeX =

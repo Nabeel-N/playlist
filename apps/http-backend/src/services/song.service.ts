@@ -17,4 +17,26 @@ export class SongService {
   async getById(id: string) {
     return await this.songRepository.findById(id);
   }
+
+  // Add this inside your SongService class
+  async toggleLike(userId: string, songId: string) {
+    const existingLike = await this.songRepository.findLikedSong(
+      userId,
+      songId,
+    );
+
+    if (existingLike) {
+      await this.songRepository.unlikeSong(userId, songId);
+      return { liked: false }; // It was removed
+    } else {
+      await this.songRepository.likeSong(userId, songId);
+      return { liked: true }; // It was added
+    }
+  }
+
+  // Inside your SongService class:
+
+  async getLikedSongs(userId: string) {
+    return await this.songRepository.findLikedSongs(userId);
+  }
 }

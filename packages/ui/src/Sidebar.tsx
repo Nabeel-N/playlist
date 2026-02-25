@@ -36,6 +36,10 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   const [showCreate, setShowCreate] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  function navitemClick() {
+    router.push("/likedsong");
+  }
+
   const [data, loading] = useFetch<PlaylistData>(
     `http://localhost:8080/playlist?refresh=${refreshKey}`,
     "GET",
@@ -63,7 +67,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
             onClick={toggleSidebar}
             className="w-[52px] flex-shrink-0 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
           >
-            <Sidebaricon /> 
+            <Sidebaricon />
           </button>
 
           <span
@@ -94,6 +98,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
         )}
 
         <NavItem
+          onClick={navitemClick}
           isOpen={isOpen}
           label="Liked Songs"
           thumbnail={

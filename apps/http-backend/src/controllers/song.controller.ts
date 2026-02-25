@@ -63,4 +63,47 @@ export class SongController {
       res.status(500).json({ message: "Error fetching song by ID" });
     }
   };
+
+  toggleLike = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = (req as any).user?.id;
+    if (typeof id !== "string") {
+      res.status(400).json({ message: "Invalid song ID" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    try {
+      // 3. Pass the 'id' variable to your service
+      const result = await this.songService.toggleLike(userId, id);
+      res.status(200).json(result);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: "Error toggling like" });
+    }
+  };
+
+  // Inside your SongController class:
+
+  getLikedSongs = async (req: Request, res: Response) => {
+    // Extract the logged-in user's ID
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    try {
+      const songs = await this.songService.getLikedSongs(userId);
+      res.status(200).json({ songs });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: "Error fetching liked songs" });
+    }
+  };
 }
