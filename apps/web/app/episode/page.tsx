@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Define the shape of the Episode data based on your backend
 interface EpisodeType {
   id: string;
   title: string;
-  duration: number; // in seconds
+  duration: number;
   url: string;
   podcastId: string;
   createdAt?: string;

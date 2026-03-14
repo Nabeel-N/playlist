@@ -10,10 +10,13 @@ export class PodcastController {
 
   create = async (req: Request, res: Response) => {
     const { name, profilePic, genre, about } = req.body;
+
+    const authorId = (req as any).user.id;
+
     if (!name || !profilePic || !genre || !about) {
-      res.status(400).json({
-        message: "Name, profilePic, genre, and about are required",
-      });
+      res
+        .status(400)
+        .json({ message: "Name, profilePic, genre, and about are required" });
       return;
     }
 
@@ -23,6 +26,7 @@ export class PodcastController {
         profilePic,
         genre,
         about,
+        authorId,
       );
       res.status(201).json(podcast);
     } catch (e) {
@@ -37,6 +41,16 @@ export class PodcastController {
       res.status(200).json({ podcasts });
     } catch (e) {
       res.status(500).json({ message: "Error fetching podcasts" });
+    }
+  };
+
+  getMyPodcasts = async (req: Request, res: Response) => {
+    const authorId = (req as any).user.id;
+    try {
+      const podcasts = await this.podcastService.getMyPodcasts(authorId);
+      res.status(200).json({ podcasts });
+    } catch (e) {
+      res.status(500).json({ message: "Error fetching your podcasts" });
     }
   };
 }

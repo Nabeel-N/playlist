@@ -1,14 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Sidebar from "@repo/ui/Sidebar"; // Assuming you have this from previous steps
+import Sidebar from "@repo/ui/Sidebar";
 
-// 1. Define the shape of an Artist based on your Prisma schema/Repository
 interface Artist {
   id: string;
   name: string;
   bio: string;
   profilePic?: string | null;
-  songs?: any[]; // The repository includes songs
+  songs?: any[];
 }
 
 export default function ArtistPage() {

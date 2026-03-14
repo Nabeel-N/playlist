@@ -17,11 +17,11 @@ export default function Podcast() {
   const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
-    async function fetchPodcasts() {
+    async function fetchPodcasts(url: string) {
       try {
         setLoading(true);
 
-        const response = await fetch("http://localhost:8080/podcast", {
+        const response = await fetch(url, {
           method: "GET",
           credentials: "include",
         });
@@ -42,8 +42,9 @@ export default function Podcast() {
         setLoading(false);
       }
     }
+    let url = "http://localhost:8080/podcast";
 
-    fetchPodcasts();
+    fetchPodcasts(url);
   }, []);
 
   return (

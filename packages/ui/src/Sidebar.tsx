@@ -86,7 +86,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               className="flex-shrink-0 flex items-center justify-center rounded-full hover:brightness-125 transition-all"
               onClick={() => setShowCreate(!showCreate)}
             >
-              <PlusIcon onClick={() => {}} />
+              <PlusIcon onClick={()=> {}} />
             </button>
           )}
         </div>

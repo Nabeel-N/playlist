@@ -8,95 +8,94 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  googleId  String   @unique
-  avatar    String?
-  
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String?
+  googleId String  @unique
+  avatar   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  playlists         Playlist[] 
-  likedSongs        LikedSong[]
-  
-  
-  followedArtists   Artist[]   @relation("UserFollowsArtist")
-  followedPodcasts  Podcast[]  @relation("UserFollowsPodcast")
+
+  playlists  Playlist[]
+  likedSongs LikedSong[]
+
+  followedArtists  Artist[]  @relation("UserFollowsArtist")
+  followedPodcasts Podcast[] @relation("UserFollowsPodcast")
+  Podcast          Podcast[]
 }
 
 model Playlist {
-  id        String   @id @default(uuid())
-  name      String
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  songs     Song[]   
-  
+  id   String @id @default(uuid())
+  name String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  songs  Song[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
 model Artist {
-  id          String   @id @default(uuid())
-  name        String
-  bio         String?
-  profilePic  String?
-  songs       Song[]   
-  
-  followedBy  User[]   @relation("UserFollowsArtist")
+  id         String  @id @default(uuid())
+  name       String
+  bio        String?
+  profilePic String?
+  songs      Song[]
+
+  followedBy User[] @relation("UserFollowsArtist")
 }
 
 model Song {
-  id           String   @id @default(uuid())
-  name         String   
-  thumbnail    String   
-  url          String
-  
-  artistId     String
-  artist       Artist   @relation(fields: [artistId], references: [id])
-  
-  playlists    Playlist[] 
-  likedBy      LikedSong[]
+  id        String @id @default(uuid())
+  name      String
+  thumbnail String
+  url       String
+
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id])
+
+  playlists Playlist[]
+  likedBy   LikedSong[]
 }
 
-
 model Podcast {
-  id          String   @id @default(uuid())
-  name        String
-  profilePic  String
-  genre       String
-  about       String
-  rating      Float    @default(0.0) 
-  
-  
-  episodes    Episode[]
-  followedBy  User[]   @relation("UserFollowsPodcast")
+  id         String @id @default(uuid())
+  name       String
+  profilePic String
+  genre      String
+  about      String
+  rating     Float  @default(0.0)
+  authorId   String
+  author     User   @relation(fields: [authorId], references: [id])
+
+  episodes   Episode[]
+  followedBy User[]    @relation("UserFollowsPodcast")
 }
 
 model Episode {
-  id          String   @id @default(uuid())
-  title       String
-  duration    Int      
-  url         String   
-  
-  podcastId   String
-  podcast     Podcast  @relation(fields: [podcastId], references: [id])
-  
-  createdAt   DateTime @default(now())
+  id       String @id @default(uuid())
+  title    String
+  duration Int
+  url      String
+
+  podcastId String
+  podcast   Podcast @relation(fields: [podcastId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model LikedSong {
-  id        String   @id @default(uuid())
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
-  songId    String
-  song      Song     @relation(fields: [songId], references: [id])
+  id String @id @default(uuid())
 
-  likedAt   DateTime @default(now()) 
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  likedAt DateTime @default(now())
 
   @@unique([userId, songId])
 }

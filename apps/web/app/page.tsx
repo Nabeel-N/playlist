@@ -32,6 +32,14 @@ interface Podcast {
   host?: { name: string };
 }
 
+// 1. ADDED ARTIST INTERFACE
+interface Artist {
+  id: string;
+  name: string;
+  bio?: string;
+  profilePic?: string | null;
+}
+
 interface ContextMenuState {
   visible: boolean;
   x: number;
@@ -47,10 +55,16 @@ export default function Home() {
   const [greeting, setGreeting] = useState("Good morning");
   const router = useRouter();
 
+  // Fetch Podcasts
   const [rawPodcastData] = useFetch("http://localhost:8080/podcast", "GET");
   const podcastdata: Podcast[] = Array.isArray(rawPodcastData)
     ? rawPodcastData
     : (rawPodcastData as any)?.podcasts || [];
+
+  const [rawArtistData] = useFetch("http://localhost:8080/artist", "GET");
+  const artistdata: Artist[] = Array.isArray(rawArtistData)
+    ? rawArtistData
+    : (rawArtistData as any)?.artists || [];
 
   const [playingSongId, setPlayingSongId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -181,16 +195,19 @@ export default function Home() {
         <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 relative overflow-y-auto bg-[#121212] rounded-lg custom-scrollbar">
-        {/* Dynamic Top Gradient */}
-        <div className="absolute inset-0 h-[400px] bg-gradient-to-b from-indigo-900/40 via-[#121212]/80 to-[#121212] pointer-events-none -z-10 transition-colors duration-1000" />
+      {/* Main Content Area */}
+      <main className="flex-1 relative overflow-y-auto bg-[#121212] rounded-xl custom-scrollbar border border-white/5 shadow-2xl">
+        {/* Soft dynamic gradient background */}
+        <div className="absolute inset-0 h-[450px] bg-gradient-to-b from-indigo-900/20 via-[#121212]/80 to-[#121212] pointer-events-none -z-10 transition-colors duration-1000" />
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col min-h-full">
           {/* Top Bar Navigation */}
-          <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-[#121212]/80 backdrop-blur-md border-b border-transparent transition-all">
+          <div className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 bg-[#121212]/80 backdrop-blur-xl border-b border-white/5 transition-all">
             <div className="flex items-center gap-4 flex-1">
-              <div className="bg-black/50 p-2 rounded-full cursor-pointer hover:bg-black/80 transition text-neutral-400 hover:text-white">
+              <div
+                className="bg-black/60 p-2.5 rounded-full cursor-pointer hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+                onClick={() => router.push("/")}
+              >
                 <HomeIcon className="size-6" />
               </div>
               <div className="w-full max-w-md">
@@ -198,65 +215,141 @@ export default function Home() {
               </div>
             </div>
 
+            <button
+              className="p-4 rounded-3xl bg-lime-700"
+              onClick={() => {
+                router.push("/create");
+              }}
+            >
+              Create
+            </button>
+
             <div className="flex items-center gap-4">
               <Topbutton
                 text="Podcasts"
                 onClick={() => router.push("/podcasts")}
               />
-              <div className="bg-black/50 hover:bg-black/80 transition p-1 pr-3 rounded-full flex items-center gap-2 cursor-pointer border border-white/5">
-                <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs font-bold text-white">
+              <Topbutton
+                text="Episode"
+                onClick={() => router.push("/episode")}
+              />
+              <div className="bg-black/60 hover:bg-white/10 transition-colors p-1 pr-3.5 rounded-full flex items-center gap-3 cursor-pointer border border-white/5">
+                <div className="w-8 h-8 bg-zinc-700/80 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-inner">
                   U
                 </div>
-                <span className="text-sm font-bold text-white">User</span>
+                <span className="text-sm font-semibold text-white tracking-wide">
+                  User
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="px-6 pb-12 pt-6">
-            <h1 className="text-4xl font-black tracking-tight mb-8 text-white">
+          {/* Main Content Padding */}
+          <div className="px-8 pb-16 pt-8 flex-1">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-10 text-white drop-shadow-sm">
               {greeting}
             </h1>
 
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {[...Array(10)].map((_, i) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {[...Array(12)].map((_, i) => (
                   <div
                     key={i}
-                    className="bg-white/5 p-4 rounded-xl animate-pulse"
+                    className="bg-[#181818] p-4 rounded-xl animate-pulse flex flex-col gap-4"
                   >
-                    <div className="w-full aspect-square bg-white/10 rounded-md mb-4" />
-                    <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-white/10 rounded w-1/2" />
+                    <div className="w-full aspect-square bg-white/5 rounded-lg shadow-sm" />
+                    <div className="space-y-2">
+                      <div className="h-4 bg-white/10 rounded-md w-3/4" />
+                      <div className="h-3 bg-white/5 rounded-md w-1/2" />
+                    </div>
                   </div>
                 ))}
               </div>
             ) : status === 401 ? (
-              <div className="flex flex-col items-center justify-center py-32 text-center">
-                <h2 className="text-2xl font-bold mb-4">
-                  Log in to see your music
+              <div className="flex flex-col items-center justify-center py-32 text-center h-full">
+                <div className="mb-6 p-6 bg-white/5 rounded-full shadow-2xl backdrop-blur-sm border border-white/10">
+                  <span className="text-4xl">👋</span>
+                </div>
+                <h2 className="text-3xl font-bold mb-4 tracking-tight">
+                  Log in to unlock your music
                 </h2>
+                <p className="text-neutral-400 mb-8 max-w-sm">
+                  Connect your account to save playlists, like songs, and get
+                  personalized recommendations.
+                </p>
                 <a
                   href="http://localhost:8080/auth/google"
-                  className="px-8 py-3 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform"
+                  className="px-10 py-4 bg-white text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg"
                 >
-                  Log in with Google
+                  Continue with Google
                 </a>
               </div>
             ) : songs.length > 0 ? (
-              <div className="space-y-12">
-                {/* Songs Section */}
+              <div className="space-y-16">
+                {/* 1. ARTISTS SECTION (NEW) */}
+                {artistdata && artistdata.length > 0 && (
+                  <section>
+                    <div className="flex items-end justify-between mb-6">
+                      <h2 className="text-2xl font-bold hover:underline cursor-pointer tracking-tight">
+                        Favorite Artists
+                      </h2>
+                      <button
+                        onClick={() => router.push("/artists")}
+                        className="text-sm font-bold text-[#A7A7A7] hover:text-white transition-colors hover:underline tracking-wide"
+                      >
+                        Show all
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                      {artistdata.map((artist) => (
+                        <div
+                          key={artist.id}
+                          onClick={() => router.push(`/artist/${artist.id}`)}
+                          className="group bg-[#181818] hover:bg-[#282828] transition-all duration-300 p-4 rounded-xl cursor-pointer flex flex-col items-center text-center relative hover:-translate-y-1 hover:shadow-2xl border border-transparent hover:border-white/5"
+                        >
+                          {/* Circular image for Artists */}
+                          <div className="relative w-full aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-full overflow-hidden group-hover:shadow-[0_16px_32px_rgba(0,0,0,0.6)] transition-shadow">
+                            <img
+                              src={
+                                artist.profilePic ||
+                                "https://placehold.co/400?text=Artist"
+                              }
+                              alt={artist.name}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+
+                          <div className="min-h-[48px] w-full">
+                            <h3 className="font-bold text-base text-white truncate mb-1 tracking-tight">
+                              {artist.name}
+                            </h3>
+                            <p className="text-[11px] text-[#A7A7A7] truncate font-bold uppercase tracking-widest mt-1">
+                              Artist
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* 2. SONGS SECTION */}
                 <section>
-                  <h2 className="text-2xl font-bold mb-6 hover:underline cursor-pointer inline-block">
-                    Your Top Mixes
-                  </h2>
+                  <div className="flex items-end justify-between mb-6">
+                    <h2 className="text-2xl font-bold hover:underline cursor-pointer tracking-tight">
+                      Your Top Mixes
+                    </h2>
+                  </div>
+
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                     {songs.map((song) => (
                       <div
                         onContextMenu={(e) => handleRightClick(e, song.id)}
                         key={song.id}
-                        className="group bg-[#181818] hover:bg-[#282828] transition-all duration-300 p-4 rounded-md cursor-pointer relative"
+                        className="group bg-[#181818] hover:bg-[#282828] transition-all duration-300 p-4 rounded-xl cursor-pointer relative hover:-translate-y-1 hover:shadow-2xl border border-transparent hover:border-white/5"
                       >
-                        <div className="relative aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.4)] rounded-md overflow-hidden">
+                        <div className="relative aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-lg overflow-hidden group-hover:shadow-[0_16px_32px_rgba(0,0,0,0.6)] transition-shadow">
                           <img
                             onClick={() => Songclick(song.id)}
                             src={
@@ -266,21 +359,26 @@ export default function Home() {
                             alt={song.name}
                             className="object-cover w-full h-full"
                           />
-                          <div className="absolute right-2 bottom-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 shadow-xl z-20">
-                            <PlayIcon
-                              onClick={(e) => handlePlayPause(e, song)}
-                              isPlaying={playingSongId === song.id && isPlaying}
-                            />
+                          {/* Play Button Overlay */}
+                          <div className="absolute right-2 bottom-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20 drop-shadow-2xl">
+                            <div className="bg-black/20 rounded-full backdrop-blur-sm p-1">
+                              <PlayIcon
+                                onClick={(e) => handlePlayPause(e, song)}
+                                isPlaying={
+                                  playingSongId === song.id && isPlaying
+                                }
+                              />
+                            </div>
                           </div>
                         </div>
                         <div
                           className="min-h-[48px]"
                           onClick={() => Songclick(song.id)}
                         >
-                          <h3 className="font-bold text-base text-white truncate mb-1">
+                          <h3 className="font-bold text-base text-white truncate mb-1.5 tracking-tight">
                             {song.name}
                           </h3>
-                          <p className="text-sm text-[#A7A7A7] line-clamp-2">
+                          <p className="text-sm text-[#A7A7A7] line-clamp-2 font-medium">
                             {song.artist?.name || "Unknown Artist"}
                           </p>
                         </div>
@@ -289,28 +387,29 @@ export default function Home() {
                   </div>
                 </section>
 
-                {/* Podcasts Section */}
+                {/* 3. PODCASTS SECTION */}
                 {podcastdata && podcastdata.length > 0 && (
                   <section>
                     <div className="flex items-end justify-between mb-6">
-                      <h2 className="text-2xl font-bold hover:underline cursor-pointer">
+                      <h2 className="text-2xl font-bold hover:underline cursor-pointer tracking-tight">
                         Popular Podcasts
                       </h2>
                       <button
                         onClick={() => router.push("/podcasts")}
-                        className="text-sm font-bold text-[#A7A7A7] hover:text-white transition-colors hover:underline"
+                        className="text-sm font-bold text-[#A7A7A7] hover:text-white transition-colors hover:underline tracking-wide"
                       >
                         Show all
                       </button>
                     </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                       {podcastdata.map((podcast) => (
                         <div
                           key={podcast.id}
                           onClick={() => router.push(`/podcasts/${podcast.id}`)}
-                          className="group bg-[#181818] hover:bg-[#282828] transition-all duration-300 p-4 rounded-md cursor-pointer relative"
+                          className="group bg-[#181818] hover:bg-[#282828] transition-all duration-300 p-4 rounded-xl cursor-pointer relative hover:-translate-y-1 hover:shadow-2xl border border-transparent hover:border-white/5"
                         >
-                          <div className="relative aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
+                          <div className="relative aspect-square mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-2xl overflow-hidden group-hover:shadow-[0_16px_32px_rgba(0,0,0,0.6)] transition-shadow">
                             <img
                               src={
                                 podcast.thumbnail ||
@@ -319,27 +418,30 @@ export default function Home() {
                               alt={podcast.name}
                               className="object-cover w-full h-full"
                             />
-                            <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
+                            {/* Podcast Badge */}
+                            <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-md uppercase tracking-widest shadow-lg">
                               Podcast
                             </div>
 
-                            <div className="absolute right-2 bottom-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 shadow-xl z-20">
-                              <PlayIcon
-                                onClick={(e) =>
-                                  handlePodcastPlayPause(e, podcast)
-                                }
-                                isPlaying={
-                                  playingSongId === podcast.id && isPlaying
-                                }
-                              />
+                            <div className="absolute right-2 bottom-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20 drop-shadow-2xl">
+                              <div className="bg-black/20 rounded-full backdrop-blur-sm p-1">
+                                <PlayIcon
+                                  onClick={(e) =>
+                                    handlePodcastPlayPause(e, podcast)
+                                  }
+                                  isPlaying={
+                                    playingSongId === podcast.id && isPlaying
+                                  }
+                                />
+                              </div>
                             </div>
                           </div>
 
                           <div className="min-h-[48px]">
-                            <h3 className="font-bold text-base text-white truncate mb-1">
+                            <h3 className="font-bold text-base text-white truncate mb-1.5 tracking-tight">
                               {podcast.name}
                             </h3>
-                            <p className="text-sm text-[#A7A7A7] truncate">
+                            <p className="text-sm text-[#A7A7A7] truncate font-medium">
                               {podcast.host?.name || "Unknown Host"}
                             </p>
                           </div>
@@ -350,13 +452,15 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-32">
-                <div className="text-5xl mb-4 opacity-50">🎵</div>
-                <h3 className="text-xl font-bold text-white">
+              <div className="flex flex-col items-center justify-center py-32 h-full">
+                <div className="text-6xl mb-6 opacity-30 drop-shadow-lg">
+                  🎵
+                </div>
+                <h3 className="text-2xl font-bold text-white tracking-tight">
                   It's a bit quiet here
                 </h3>
-                <p className="text-neutral-400 mt-2">
-                  Discover new music and podcasts.
+                <p className="text-neutral-400 mt-2 font-medium">
+                  Discover new music and podcasts to fill your library.
                 </p>
               </div>
             )}
@@ -364,58 +468,70 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Modernized Now Playing Panel */}
+      {/* Modernized Now Playing Panel Sidebar */}
       {playingSongId && (
-        <aside className="flex-shrink-0 w-72 h-full bg-[#121212] rounded-lg flex flex-col items-center p-6 ml-2 overflow-y-auto custom-scrollbar relative">
-          <div className="w-full flex justify-between items-center mb-6">
-            <h3 className="text-sm font-bold text-white">Now Playing</h3>
-            <div className="flex gap-1">
+        <aside className="flex-shrink-0 w-80 h-full bg-[#121212] rounded-xl flex flex-col p-6 ml-2 overflow-y-auto custom-scrollbar border border-white/5 shadow-2xl relative">
+          {/* Subtle gradient glow behind the album art */}
+          <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-white/5 to-transparent pointer-events-none rounded-t-xl" />
+
+          <div className="w-full flex justify-between items-center mb-8 relative z-10">
+            <h3 className="text-sm font-bold text-white tracking-wide">
+              Now Playing
+            </h3>
+            <div className="flex gap-1.5 h-3 items-end">
               <span
-                className={`block w-1 h-3 bg-green-500 rounded-full ${isPlaying ? "animate-[bounce_1s_infinite]" : "opacity-50"}`}
+                className={`block w-1 bg-green-500 rounded-t-sm ${isPlaying ? "animate-[bounce_1s_infinite] h-full" : "h-1 opacity-50"}`}
                 style={{ animationDelay: "0ms" }}
               />
               <span
-                className={`block w-1 h-4 bg-green-500 rounded-full ${isPlaying ? "animate-[bounce_1s_infinite]" : "opacity-50"}`}
+                className={`block w-1 bg-green-500 rounded-t-sm ${isPlaying ? "animate-[bounce_1s_infinite] h-full" : "h-1 opacity-50"}`}
                 style={{ animationDelay: "200ms" }}
               />
               <span
-                className={`block w-1 h-2 bg-green-500 rounded-full ${isPlaying ? "animate-[bounce_1s_infinite]" : "opacity-50"}`}
+                className={`block w-1 bg-green-500 rounded-t-sm ${isPlaying ? "animate-[bounce_1s_infinite] h-full" : "h-1 opacity-50"}`}
                 style={{ animationDelay: "400ms" }}
               />
             </div>
           </div>
 
-          <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.5)] mb-6 relative group">
+          <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] mb-6 relative z-10 ring-1 ring-white/10">
             <img
               src={CurrentPlaysongImage[0]}
               alt="Now playing"
-              className={`w-full h-full object-cover transition-transform duration-[10s] ${
+              className={`w-full h-full object-cover transition-transform duration-[15s] ease-linear ${
                 isPlaying ? "scale-110" : "scale-100"
               }`}
             />
           </div>
 
-          <div className="w-full text-left">
-            <h2 className="text-white font-bold text-xl leading-tight mb-1 hover:underline cursor-pointer">
+          <div className="w-full text-left relative z-10 mb-8">
+            <h2 className="text-white font-black text-2xl leading-tight mb-1.5 hover:underline cursor-pointer truncate tracking-tight drop-shadow-sm">
               {currentPlayingItem?.name || "Unknown"}
             </h2>
-            <p className="text-[#A7A7A7] text-sm hover:underline cursor-pointer">
+            <p className="text-[#A7A7A7] text-sm hover:underline cursor-pointer truncate font-medium">
               {(currentPlayingItem as Song)?.artist?.name ||
                 (currentPlayingItem as Podcast)?.host?.name ||
                 "Unknown Artist"}
             </p>
           </div>
 
-          <div className="w-full mt-8 bg-white/5 rounded-xl p-4 border border-white/5">
-            <p className="text-xs text-neutral-400 font-medium mb-2 uppercase tracking-wider">
-              Next in queue
+          <div className="w-full mt-auto bg-[#181818] rounded-2xl p-5 border border-white/5 shadow-inner relative z-10">
+            <div className="flex justify-between items-start mb-3">
+              <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest">
+                Next in queue
+              </p>
+              <span className="text-xs bg-white/10 text-white px-2 py-0.5 rounded-full font-medium">
+                Auto
+              </span>
+            </div>
+            <p className="text-sm text-white font-semibold">
+              Similar tracks will play next
             </p>
-            <p className="text-sm text-white font-medium">Auto-play is on</p>
           </div>
         </aside>
       )}
 
-      {/* Render the Custom Context Menu */}
+      {/* Context Menu */}
       {contextMenu.visible && (
         <SongOpen
           x={contextMenu.x}

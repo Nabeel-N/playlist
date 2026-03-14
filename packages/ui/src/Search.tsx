@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Song {
   id: string;
@@ -11,7 +11,7 @@ interface Song {
 interface SearchProp {
   icon: React.ReactNode;
   placeholder?: string;
-  song: Song[]; // Note: It's an array of songs
+  song: Song[];
 }
 
 export default function Search({
@@ -24,9 +24,15 @@ export default function Search({
     s.name.toLowerCase().includes(searchtext.toLowerCase()),
   );
 
+  const [click, SetClick] = useState(false);
+
+  function SearcboxClick() {
+    SetClick(!click);
+  }
+
   return (
-    <div className="relative w-full max-w-[450px]">
-      <div className="group flex items-center gap-3 bg-[#242424] hover:bg-[#2a2a2a] px-4 py-3 rounded-full w-full border border-transparent hover:border-white/10 focus-within:border-white/20 focus-within:bg-[#2a2a2a] transition-all z-50 relative">
+    <div className="relative w-full max-w-[450px] ">
+      <div className="group flex items-center gap-3 bg-[#242424] hover:bg-green-900 px-4 py-3 rounded-full w-full border border-transparent hover:border-white/10 focus-within:border-white/20 focus-within:bg-[#2a2a2a] transition-all z-50 relative">
         {/* Icon Container */}
         <div className="text-neutral-400 group-focus-within:text-white transition-colors flex shrink-0">
           {icon}
@@ -36,8 +42,9 @@ export default function Search({
         <input
           type="text"
           placeholder={placeholder}
-          className="bg-transparent text-white placeholder-neutral-400 text-sm font-medium focus:outline-none w-full truncate"
+          className="bg-transparent text-white placeholder-neutral-400 text-sm font-medium focus:outline-none w-full truncate "
           onChange={(e) => setSearchText(e.target.value)}
+          onClick={SearcboxClick}
           value={searchtext}
         />
       </div>

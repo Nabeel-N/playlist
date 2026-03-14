@@ -7,11 +7,27 @@ export class PodcastService {
     this.podcastRepository = new PodcastRepository();
   }
 
-  async create(name: string, profilePic: string, genre: string, about: string) {
-    return await this.podcastRepository.create(name, profilePic, genre, about);
+  async create(
+    name: string,
+    profilePic: string,
+    genre: string,
+    about: string,
+    authorId: string,
+  ) {
+    return await this.podcastRepository.create(
+      name,
+      profilePic,
+      genre,
+      about,
+      authorId,
+    );
   }
 
   async getAll() {
     return await this.podcastRepository.findAll();
+  }
+
+  async getMyPodcasts(authorId: string) {
+    return await this.podcastRepository.findByUserId(authorId);
   }
 }
